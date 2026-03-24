@@ -5,6 +5,8 @@ import morgan from 'morgan';
 import passport from 'passport';
 import { errorHandler } from './middleware/errorHandler';
 import authRoutes from './routes/auth.routes';
+import projectRoutes from './routes/projects.routes';
+import taskRoutes from './routes/tasks.routes';
 
 export function createApp() {
   const app = express();
@@ -20,6 +22,12 @@ export function createApp() {
 
   // Auth routes
   app.use('/api/auth', authRoutes);
+
+  // Projects routes
+  app.use('/api/projects', projectRoutes);
+
+  // Tasks routes
+  app.use('/api/tasks', taskRoutes);
 
   // Health check
   app.get('/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
