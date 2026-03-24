@@ -2,7 +2,11 @@ import { z } from 'zod';
 import dotenv from 'dotenv';
 import path from 'path';
 
-dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+const envPath = path.resolve(__dirname, '../../../../.env');
+const result = dotenv.config({ path: envPath });
+if (result.error) {
+  console.warn(`[ENV] Failed to load .env file from ${envPath}`);
+}
 
 const envSchema = z.object({
   DATABASE_URL: z.string().default('postgresql://slapm:slapm_dev@localhost:5432/slapm'),
