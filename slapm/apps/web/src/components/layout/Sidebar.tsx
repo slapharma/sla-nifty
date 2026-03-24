@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { Link, useParams, useLocation } from 'react-router-dom'
 import { useProjects } from '@/hooks/useProjects'
 import { useAuth } from '@/hooks/useAuth'
 import { useAppStore } from '@/store/useAppStore'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
 import { cn } from '@/lib/utils'
 import {
   LayoutDashboard,
@@ -19,10 +21,12 @@ export function Sidebar() {
   const { user, logout } = useAuth()
   const { data: projects = [], isLoading } = useProjects()
   const sidebarOpen = useAppStore((s) => s.sidebarOpen)
+  const [showCreateProject, setShowCreateProject] = useState(false)
 
   if (!sidebarOpen) return null
 
   return (
+    <>
     <aside className="w-60 shrink-0 bg-slate-900 border-r border-slate-800 flex flex-col h-screen">
       {/* Brand */}
       <div className="flex items-center gap-3 px-4 py-5 border-b border-slate-800">
@@ -56,7 +60,11 @@ export function Sidebar() {
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Projects
             </span>
-            <button className="text-slate-500 hover:text-slate-300 transition-colors">
+            <button
+              onClick={() => setShowCreateProject(true)}
+              className="text-slate-500 hover:text-slate-300 transition-colors"
+              title="New project"
+            >
               <Plus size={14} />
             </button>
           </div>
@@ -124,5 +132,10 @@ export function Sidebar() {
         )}
       </div>
     </aside>
+
+    {showCreateProject && (
+      <CreateProjectModal onClose={() => setShowCreateProject(false)} />
+    )}
+  </>
   )
 }
