@@ -1,6 +1,6 @@
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { Task, TaskStatus } from '../../../types'
+import { Task, TaskStatus } from '../../types'
 import { KanbanCard } from './KanbanCard'
 import { Plus } from 'lucide-react'
 

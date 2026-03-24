@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { TaskStatus, TaskPriority } from '../../../types'
+import { TaskStatus, TaskPriority } from '../../types'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { useCreateTask } from '../../hooks/useTasks'
