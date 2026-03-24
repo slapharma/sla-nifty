@@ -1,16 +1,41 @@
-import './index.css'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { queryClient } from '@/lib/queryClient'
+import { AppShell } from '@/components/layout/AppShell'
+import { RequireAuth } from '@/components/auth/RequireAuth'
+import { AuthCallback } from '@/components/auth/AuthCallback'
+import { LoginPage } from '@/pages/LoginPage'
+import { DashboardPage } from '@/pages/DashboardPage'
+import { ProjectPage } from '@/pages/ProjectPage'
+import { SettingsPage } from '@/pages/SettingsPage'
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-blue-400 mb-2">SLA</h1>
-        <p className="text-slate-400">SLA Pharma Project Management</p>
-        <div className="mt-4 inline-flex items-center gap-2 bg-slate-800 text-blue-300 px-4 py-2 rounded-full text-sm">
-          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-          React app loaded — building features...
-        </div>
-      </div>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          {/* Public */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+
+          {/* Protected */}
+          <Route
+            path="/"
+            element={
+              <RequireAuth>
+                <AppShell />
+              </RequireAuth>
+            }
+          >
+            <Route index element={<DashboardPage />} />
+            <Route path="projects/:projectId" element={<ProjectPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+          </Route>
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   )
 }
