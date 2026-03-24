@@ -7,7 +7,7 @@ import {
   useSensors,
   closestCenter,
 } from '@dnd-kit/core'
-import { Task, TaskStatus } from '../../../types'
+import { Task, TaskStatus } from '../../types'
 import { KanbanColumn } from './KanbanColumn'
 import { useTasks, useUpdateTaskPosition } from '../../hooks/useTasks'
 

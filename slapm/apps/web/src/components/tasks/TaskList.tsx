@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Task, TaskStatus } from '../../../types'
+import { Task, TaskStatus } from '../../types'
 import { TaskRow } from './TaskRow'
 import { Input } from '../ui/input'
 import { Search } from 'lucide-react'
