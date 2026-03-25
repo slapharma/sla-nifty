@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import passport from 'passport';
+import bcrypt from 'bcryptjs';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { prisma } from '../config/prisma';
 import { generateToken, verifyToken } from '../services/auth.service';
@@ -61,6 +62,27 @@ router.get(
     res.redirect(redirectUrl);
   }
 );
+
+// Email + password login
+router.post('/login', async (req: Request, res: Response) => {
+  const { email, password } = req.body as { email?: string; password?: string };
+  if (!email || !password) {
+    res.status(400).json({ error: 'email and password are required' });
+    return;
+  }
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user?.passwordHash) {
+    res.status(401).json({ error: 'Invalid credentials' });
+    return;
+  }
+  const valid = await bcrypt.compare(password, user.passwordHash);
+  if (!valid) {
+    res.status(401).json({ error: 'Invalid credentials' });
+    return;
+  }
+  const token = generateToken({ userId: user.id, email: user.email, role: user.role });
+  res.json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role } });
+});
 
 // Dev login (disabled in production)
 router.post('/dev-login', async (req: Request, res: Response) => {

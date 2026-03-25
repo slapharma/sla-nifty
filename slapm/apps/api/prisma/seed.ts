@@ -1,25 +1,29 @@
 import { PrismaClient, Role, TaskStatus, TaskPriority } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('Seeding database...');
 
+  const passwordHash = await bcrypt.hash('SLAAdmin2026!', 10);
+
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@slapharma.com' },
+    where: { email: 'admin@slapharmagroup.com' },
     update: {},
     create: {
-      email: 'admin@slapharma.com',
+      email: 'admin@slapharmagroup.com',
       name: 'SLA Admin',
       role: Role.ADMIN,
+      passwordHash,
     },
   });
 
   const member1 = await prisma.user.upsert({
-    where: { email: 'alice@slapharma.com' },
+    where: { email: 'alice@slapharmagroup.com' },
     update: {},
     create: {
-      email: 'alice@slapharma.com',
+      email: 'alice@slapharmagroup.com',
       name: 'Alice Johnson',
       role: Role.MEMBER,
     },
