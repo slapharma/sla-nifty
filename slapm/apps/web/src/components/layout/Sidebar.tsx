@@ -42,16 +42,8 @@ export function Sidebar() {
 
   const toggle = (id: string) => setCollapsed((p) => ({ ...p, [id]: !p[id] }))
 
-  // Use divisions API when available; fall back to deriving from project.division relation
-  const divisionList = divisions.length > 0
-    ? divisions
-    : [...new Map(
-        projects
-          .filter((p) => p.division)
-          .map((p) => [p.division!.id, p.division!] as [string, NonNullable<typeof p.division>])
-      ).values()]
-
-  const byDivision = divisionList.map((div) => ({
+  // divisions always has data (API or builtin fallback); group projects by ID
+  const byDivision = divisions.map((div) => ({
     division: div,
     projects: projects.filter((p) => (p.divisionId ?? p.division?.id) === div.id),
   }))
