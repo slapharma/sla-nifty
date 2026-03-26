@@ -8,8 +8,9 @@ import { GanttChart } from '../components/gantt/GanttChart'
 import { MilestoneList } from '../components/milestones/MilestoneList'
 import { useTasks, useTask } from '../hooks/useTasks'
 import { useProject, useUpdateProject } from '../hooks/useProjects'
+import { useDivisions } from '../hooks/useDivisions'
 import { TaskStatus } from '../types'
-import { LayoutGrid, List, GanttChart as GanttIcon, Flag, Plus, Pencil, Check, X } from 'lucide-react'
+import { LayoutGrid, List, GanttChart as GanttIcon, Flag, Plus, Pencil, Check, X, Building2, ChevronDown } from 'lucide-react'
 import { Button } from '../components/ui/button'
 
 type ViewMode = 'kanban' | 'list' | 'gantt' | 'milestones'
@@ -28,17 +29,31 @@ export function ProjectPage() {
   const [addTaskStatus, setAddTaskStatus] = useState<TaskStatus | null>(null)
   const [editingName, setEditingName] = useState(false)
   const [nameValue, setNameValue] = useState('')
+  const [showDivisionPicker, setShowDivisionPicker] = useState(false)
   const nameInputRef = useRef<HTMLInputElement>(null)
+  const divisionPickerRef = useRef<HTMLDivElement>(null)
 
   const { data: tasks = [] } = useTasks(projectId ?? '')
   const { data: fetchedTask } = useTask(selectedTaskId)
   const selectedTask = tasks.find(t => t.id === selectedTaskId) ?? fetchedTask ?? null
   const { data: project } = useProject(projectId ?? '')
   const updateProject = useUpdateProject()
+  const { data: divisions = [] } = useDivisions()
 
   useEffect(() => {
     if (project) setNameValue(project.name)
   }, [project?.name])
+
+  useEffect(() => {
+    if (!showDivisionPicker) return
+    const handler = (e: MouseEvent) => {
+      if (divisionPickerRef.current && !divisionPickerRef.current.contains(e.target as Node)) {
+        setShowDivisionPicker(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showDivisionPicker])
 
   useEffect(() => {
     if (editingName) nameInputRef.current?.focus()
@@ -111,11 +126,48 @@ export function ProjectPage() {
             </button>
           ))}
         </div>
-        {(viewMode === 'kanban' || viewMode === 'list') && (
-          <Button size="sm" onClick={() => setAddTaskStatus('TODO')}>
-            <Plus size={15} className="mr-1" /> Add Task
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {/* Move to Division */}
+          <div className="relative" ref={divisionPickerRef}>
+            <button
+              onClick={() => setShowDivisionPicker((v) => !v)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm border border-gray-200 text-slate-600 hover:bg-gray-50 transition-colors"
+            >
+              <Building2 size={14} />
+              <span>{project?.division?.name ?? 'No Division'}</span>
+              <ChevronDown size={12} className="text-slate-400" />
+            </button>
+            {showDivisionPicker && (
+              <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1 overflow-hidden">
+                {divisions.map((div) => {
+                  const isCurrent = (project?.divisionId ?? project?.division?.id) === div.id
+                  return (
+                    <button
+                      key={div.id}
+                      onClick={() => {
+                        if (!isCurrent && projectId) {
+                          updateProject.mutate({ projectId, data: { divisionId: div.id } })
+                        }
+                        setShowDivisionPicker(false)
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-slate-50 transition-colors"
+                    >
+                      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: div.color }} />
+                      <span className="flex-1 text-left text-slate-700">{div.name}</span>
+                      {isCurrent && <Check size={13} className="text-blue-500 shrink-0" />}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          {(viewMode === 'kanban' || viewMode === 'list') && (
+            <Button size="sm" onClick={() => setAddTaskStatus('TODO')}>
+              <Plus size={15} className="mr-1" /> Add Task
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Main view */}
