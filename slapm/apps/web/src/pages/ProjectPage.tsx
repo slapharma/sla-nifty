@@ -1,29 +1,33 @@
 import { useState, useRef, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { KanbanBoard } from '../components/kanban/KanbanBoard'
 import { TaskList } from '../components/tasks/TaskList'
 import { TaskDetail } from '../components/tasks/TaskDetail'
 import { TaskForm } from '../components/tasks/TaskForm'
 import { GanttChart } from '../components/gantt/GanttChart'
 import { MilestoneList } from '../components/milestones/MilestoneList'
-import { useTasks } from '../hooks/useTasks'
+import { useTasks, useTask, useArchivedTasks } from '../hooks/useTasks'
 import { useProject, useUpdateProject } from '../hooks/useProjects'
 import { TaskStatus } from '../types'
-import { LayoutGrid, List, GanttChart as GanttIcon, Flag, Plus, Pencil, Check, X } from 'lucide-react'
+import { LayoutGrid, List, GanttChart as GanttIcon, Flag, Archive, Plus, Pencil, Check, X } from 'lucide-react'
 import { Button } from '../components/ui/button'
 
-type ViewMode = 'kanban' | 'list' | 'gantt' | 'milestones'
+type ViewMode = 'kanban' | 'list' | 'gantt' | 'milestones' | 'archive'
 
 const views: { id: ViewMode; label: string; icon: React.ReactNode }[] = [
   { id: 'kanban', label: 'Kanban', icon: <LayoutGrid size={15} /> },
   { id: 'list', label: 'List', icon: <List size={15} /> },
   { id: 'gantt', label: 'Gantt', icon: <GanttIcon size={15} /> },
   { id: 'milestones', label: 'Milestones', icon: <Flag size={15} /> },
+  { id: 'archive', label: 'Archive', icon: <Archive size={15} /> },
 ]
 
 export function ProjectPage() {
   const { projectId } = useParams<{ projectId: string }>()
-  const [viewMode, setViewMode] = useState<ViewMode>('kanban')
+  const [searchParams] = useSearchParams()
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    searchParams.get('view') === 'archive' ? 'archive' : 'kanban'
+  )
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
   const [addTaskStatus, setAddTaskStatus] = useState<TaskStatus | null>(null)
   const [editingName, setEditingName] = useState(false)
@@ -31,9 +35,16 @@ export function ProjectPage() {
   const nameInputRef = useRef<HTMLInputElement>(null)
 
   const { data: tasks = [] } = useTasks(projectId ?? '')
-  const selectedTask = tasks.find(t => t.id === selectedTaskId) ?? null
+  const { data: archivedTasks = [] } = useArchivedTasks(projectId ?? '')
+  const { data: fetchedTask } = useTask(selectedTaskId)
+  const selectedTask = tasks.find(t => t.id === selectedTaskId) ?? fetchedTask ?? null
   const { data: project } = useProject(projectId ?? '')
   const updateProject = useUpdateProject()
+
+  // Sync viewMode when URL search params change (e.g., sidebar archive link)
+  useEffect(() => {
+    if (searchParams.get('view') === 'archive') setViewMode('archive')
+  }, [searchParams])
 
   useEffect(() => {
     if (project) setNameValue(project.name)
@@ -141,9 +152,25 @@ export function ProjectPage() {
             <MilestoneList projectId={projectId} />
           </div>
         )}
+        {viewMode === 'archive' && (
+          <div className="overflow-y-auto h-full">
+            {archivedTasks.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-slate-400 gap-2">
+                <Archive size={32} className="opacity-40" />
+                <p className="text-sm">No archived tasks</p>
+              </div>
+            ) : (
+              <TaskList tasks={archivedTasks} onTaskClick={(t) => setSelectedTaskId(t.id)} />
+            )}
+          </div>
+        )}
 
         {selectedTask && (
-          <TaskDetail task={selectedTask} onClose={() => setSelectedTaskId(null)} />
+          <TaskDetail
+            task={selectedTask}
+            onClose={() => setSelectedTaskId(null)}
+            onSubtaskClick={(id) => setSelectedTaskId(id)}
+          />
         )}
       </div>
 

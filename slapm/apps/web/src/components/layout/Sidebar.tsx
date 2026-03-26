@@ -7,22 +7,40 @@ import { useAppStore } from '@/store/useAppStore'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, ChevronRight, ChevronDown, Plus, Settings, LogOut, Loader2, Building2 } from 'lucide-react'
+import { LayoutDashboard, ChevronRight, ChevronDown, Plus, Settings, LogOut, Loader2, Building2, Archive } from 'lucide-react'
 import type { Project } from '@/types'
 
 function ProjectLink({ project, active }: { project: Project; active: boolean }) {
+  const location = useLocation()
+  const isArchiveActive = active && location.search.includes('view=archive')
+  const isProjectActive = active && !isArchiveActive
+
   return (
-    <Link
-      to={`/projects/${project.id}`}
-      className={cn(
-        'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors group',
-        active ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800'
+    <div>
+      <Link
+        to={`/projects/${project.id}`}
+        className={cn(
+          'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors group',
+          isProjectActive ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800'
+        )}
+      >
+        <span className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: project.color }} />
+        <span className="flex-1 truncate">{project.name}</span>
+        <ChevronRight size={11} className="opacity-0 group-hover:opacity-50" />
+      </Link>
+      {active && (
+        <Link
+          to={`/projects/${project.id}?view=archive`}
+          className={cn(
+            'flex items-center gap-1.5 pl-7 pr-3 py-1 rounded-lg text-xs transition-colors',
+            isArchiveActive ? 'text-slate-300' : 'text-slate-500 hover:text-slate-300'
+          )}
+        >
+          <Archive size={11} />
+          Archived Tasks
+        </Link>
       )}
-    >
-      <span className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: project.color }} />
-      <span className="flex-1 truncate">{project.name}</span>
-      <ChevronRight size={11} className="opacity-0 group-hover:opacity-50" />
-    </Link>
+    </div>
   )
 }
 

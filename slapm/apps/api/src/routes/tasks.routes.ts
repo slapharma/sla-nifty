@@ -16,16 +16,26 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 router.get('/', async (req: Request, res: Response) => {
-  const { projectId } = req.query as { projectId?: string };
+  const { projectId, status } = req.query as { projectId?: string; status?: string };
   if (!projectId) {
     res.status(400).json({ error: 'projectId query parameter is required' });
     return;
   }
   try {
-    const tasks = await taskService.getProjectTasks(projectId);
+    const tasks = await taskService.getProjectTasks(projectId, status);
     res.json(tasks);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch tasks' });
+  }
+});
+
+router.get('/:id', async (req: Request, res: Response) => {
+  try {
+    const task = await taskService.getTaskById(req.params.id);
+    if (!task) { res.status(404).json({ error: 'Task not found' }); return; }
+    res.json(task);
+  } catch {
+    res.status(500).json({ error: 'Failed to fetch task' });
   }
 });
 

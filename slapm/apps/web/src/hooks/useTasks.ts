@@ -10,6 +10,22 @@ export function useTasks(projectId: string) {
   })
 }
 
+export function useArchivedTasks(projectId: string) {
+  return useQuery({
+    queryKey: ['tasks', projectId, 'archived'],
+    queryFn: async () => (await api.get<Task[]>(`/tasks?projectId=${projectId}&status=DONE`)).data,
+    enabled: !!projectId,
+  })
+}
+
+export function useTask(taskId: string | null) {
+  return useQuery({
+    queryKey: ['task', taskId],
+    queryFn: async () => (await api.get<Task>(`/tasks/${taskId}`)).data,
+    enabled: !!taskId,
+  })
+}
+
 export function useUpdateTaskStatus(projectId: string) {
   const qc = useQueryClient()
   return useMutation({
@@ -26,7 +42,10 @@ export function useUpdateTaskStatus(projectId: string) {
     onError: (_err, _vars, ctx) => {
       if (ctx?.prev) qc.setQueryData(['tasks', projectId], ctx.prev)
     },
-    onSettled: () => qc.invalidateQueries({ queryKey: ['tasks', projectId] }),
+    onSettled: (_data, _err, vars) => {
+      qc.invalidateQueries({ queryKey: ['tasks', projectId] })
+      qc.invalidateQueries({ queryKey: ['task', vars.taskId] })
+    },
   })
 }
 
@@ -46,7 +65,10 @@ export function useUpdateTaskPosition(projectId: string) {
     onError: (_err, _vars, ctx) => {
       if (ctx?.prev) qc.setQueryData(['tasks', projectId], ctx.prev)
     },
-    onSettled: () => qc.invalidateQueries({ queryKey: ['tasks', projectId] }),
+    onSettled: (_data, _err, vars) => {
+      qc.invalidateQueries({ queryKey: ['tasks', projectId] })
+      qc.invalidateQueries({ queryKey: ['task', vars.taskId] })
+    },
   })
 }
 
@@ -108,6 +130,9 @@ export function useUpdateTask(projectId: string) {
     onError: (_err, _vars, ctx) => {
       if (ctx?.prev) qc.setQueryData(['tasks', projectId], ctx.prev)
     },
-    onSettled: () => qc.invalidateQueries({ queryKey: ['tasks', projectId] }),
+    onSettled: (_data, _err, vars) => {
+      qc.invalidateQueries({ queryKey: ['tasks', projectId] })
+      qc.invalidateQueries({ queryKey: ['task', vars.taskId] })
+    },
   })
 }

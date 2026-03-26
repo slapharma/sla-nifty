@@ -38,17 +38,32 @@ export async function createTask(creatorId: string, data: CreateTaskInput) {
   });
 }
 
-export async function getProjectTasks(projectId: string) {
+const TASK_INCLUDE = {
+  assignee: { select: { id: true, name: true, email: true, avatarUrl: true, role: true } },
+  creator: { select: { id: true, name: true, email: true, avatarUrl: true, role: true } },
+  milestone: { select: { id: true, title: true, status: true } },
+  subtasks: { select: { id: true, title: true, status: true, priority: true, assigneeId: true, dueDate: true } },
+  _count: { select: { comments: true } },
+} as const;
+
+export async function getProjectTasks(projectId: string, status?: string) {
+  const where: Record<string, unknown> = { projectId, parentId: null };
+  if (status === 'DONE') {
+    where.status = 'DONE';
+  } else {
+    where.status = { not: 'DONE' };
+  }
   return prisma.task.findMany({
-    where: { projectId, parentId: null },
-    include: {
-      assignee: { select: { id: true, name: true, email: true, avatarUrl: true } },
-      creator: { select: { id: true, name: true, email: true, avatarUrl: true } },
-      milestone: { select: { id: true, title: true, status: true } },
-      subtasks: { select: { id: true, title: true, status: true } },
-      _count: { select: { comments: true } },
-    },
+    where,
+    include: TASK_INCLUDE,
     orderBy: [{ status: 'asc' }, { position: 'asc' }],
+  });
+}
+
+export async function getTaskById(taskId: string) {
+  return prisma.task.findUnique({
+    where: { id: taskId },
+    include: TASK_INCLUDE,
   });
 }
 
