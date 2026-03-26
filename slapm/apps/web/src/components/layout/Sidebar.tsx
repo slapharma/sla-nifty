@@ -47,8 +47,6 @@ export function Sidebar() {
     division: div,
     projects: projects.filter((p) => (p.divisionId ?? p.division?.id) === div.id),
   }))
-  const unassigned = projects.filter((p) => !p.divisionId && !p.division)
-
   return (
     <>
       <aside className="w-60 shrink-0 bg-slate-900 border-r border-slate-800 flex flex-col h-screen">
@@ -119,24 +117,6 @@ export function Sidebar() {
                   </div>
                 ))}
 
-                {unassigned.length > 0 && (
-                  <div className="mt-1">
-                    <button
-                      onClick={() => toggle('__unassigned__')}
-                      className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-white hover:bg-slate-800 transition-colors"
-                    >
-                      <span className="flex-1 text-left">Other</span>
-                      {collapsed['__unassigned__'] ? <ChevronRight size={11} /> : <ChevronDown size={11} />}
-                    </button>
-                    {!collapsed['__unassigned__'] && (
-                      <div className="ml-3 mt-0.5 space-y-0.5 border-l border-slate-800 pl-2">
-                        {unassigned.map((p) => (
-                          <ProjectLink key={p.id} project={p} active={projectId === p.id} />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
               </>
             )}
           </div>
