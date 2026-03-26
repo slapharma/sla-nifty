@@ -47,3 +47,12 @@ export function useCreateTask(projectId: string) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['tasks', projectId] }),
   })
 }
+
+export function useUpdateTask(projectId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ taskId, data }: { taskId: string; data: Partial<Task> & { assigneeId?: string | null } }) =>
+      (await api.patch<Task>(`/tasks/${taskId}`, data)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['tasks', projectId] }),
+  })
+}

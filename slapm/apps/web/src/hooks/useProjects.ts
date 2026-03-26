@@ -10,11 +10,31 @@ export function useProjects() {
   })
 }
 
+export function useProject(projectId: string) {
+  return useQuery({
+    queryKey: ['project', projectId],
+    queryFn: async () => (await api.get<Project>(`/projects/${projectId}`)).data,
+    enabled: !!projectId,
+  })
+}
+
 export function useCreateProject() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (data: { name: string; description?: string; color?: string }) =>
       (await api.post<Project>('/projects', data)).data,
     onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
+  })
+}
+
+export function useUpdateProject() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ projectId, data }: { projectId: string; data: { name?: string; description?: string; color?: string } }) =>
+      (await api.patch<Project>(`/projects/${projectId}`, data)).data,
+    onSuccess: (project) => {
+      qc.invalidateQueries({ queryKey: ['projects'] })
+      qc.invalidateQueries({ queryKey: ['project', project.id] })
+    },
   })
 }
