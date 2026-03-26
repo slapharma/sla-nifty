@@ -8,7 +8,7 @@ import { GanttChart } from '../components/gantt/GanttChart'
 import { MilestoneList } from '../components/milestones/MilestoneList'
 import { useTasks } from '../hooks/useTasks'
 import { useProject, useUpdateProject } from '../hooks/useProjects'
-import { Task, TaskStatus } from '../types'
+import { TaskStatus } from '../types'
 import { LayoutGrid, List, GanttChart as GanttIcon, Flag, Plus, Pencil, Check, X } from 'lucide-react'
 import { Button } from '../components/ui/button'
 
@@ -24,13 +24,14 @@ const views: { id: ViewMode; label: string; icon: React.ReactNode }[] = [
 export function ProjectPage() {
   const { projectId } = useParams<{ projectId: string }>()
   const [viewMode, setViewMode] = useState<ViewMode>('kanban')
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
   const [addTaskStatus, setAddTaskStatus] = useState<TaskStatus | null>(null)
   const [editingName, setEditingName] = useState(false)
   const [nameValue, setNameValue] = useState('')
   const nameInputRef = useRef<HTMLInputElement>(null)
 
   const { data: tasks = [] } = useTasks(projectId ?? '')
+  const selectedTask = tasks.find(t => t.id === selectedTaskId) ?? null
   const { data: project } = useProject(projectId ?? '')
   const updateProject = useUpdateProject()
 
@@ -121,13 +122,13 @@ export function ProjectPage() {
         {viewMode === 'kanban' && (
           <KanbanBoard
             projectId={projectId}
-            onTaskClick={setSelectedTask}
+            onTaskClick={(t) => setSelectedTaskId(t.id)}
             onAddTask={(status) => setAddTaskStatus(status)}
           />
         )}
         {viewMode === 'list' && (
           <div className="overflow-y-auto h-full">
-            <TaskList tasks={tasks} onTaskClick={setSelectedTask} />
+            <TaskList tasks={tasks} onTaskClick={(t) => setSelectedTaskId(t.id)} />
           </div>
         )}
         {viewMode === 'gantt' && (
@@ -142,7 +143,7 @@ export function ProjectPage() {
         )}
 
         {selectedTask && (
-          <TaskDetail task={selectedTask} onClose={() => setSelectedTask(null)} />
+          <TaskDetail task={selectedTask} onClose={() => setSelectedTaskId(null)} />
         )}
       </div>
 
