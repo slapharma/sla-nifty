@@ -6,8 +6,9 @@ import { useAuth } from '@/hooks/useAuth'
 import { useAppStore } from '@/store/useAppStore'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
+import { CreateDivisionModal } from '@/components/divisions/CreateDivisionModal'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, ChevronRight, ChevronDown, Plus, Settings, LogOut, Loader2, Building2, Archive } from 'lucide-react'
+import { LayoutDashboard, ChevronRight, ChevronDown, Plus, Settings, LogOut, Loader2, Building2, Archive, FolderPlus } from 'lucide-react'
 import type { Project } from '@/types'
 
 function ProjectLink({ project, active }: { project: Project; active: boolean }) {
@@ -52,6 +53,7 @@ export function Sidebar() {
   const { data: divisions = [] } = useDivisions()
   const sidebarOpen = useAppStore((s) => s.sidebarOpen)
   const [showCreateProject, setShowCreateProject] = useState(false)
+  const [showCreateDivision, setShowCreateDivision] = useState(false)
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
 
   if (!sidebarOpen) return null
@@ -94,15 +96,8 @@ export function Sidebar() {
 
           {/* Divisions + Projects */}
           <div className="pt-3">
-            <div className="flex items-center justify-between px-3 mb-2">
+            <div className="px-3 mb-2">
               <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Divisions</span>
-              <button
-                onClick={() => setShowCreateProject(true)}
-                className="text-slate-500 hover:text-slate-300 transition-colors"
-                title="New project"
-              >
-                <Plus size={14} />
-              </button>
             </div>
 
             {isLoading ? (
@@ -167,6 +162,20 @@ export function Sidebar() {
 
         {/* Footer */}
         <div className="p-3 border-t border-slate-800 space-y-1">
+          <button
+            onClick={() => setShowCreateDivision(true)}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+          >
+            <Building2 size={16} />
+            Add Division
+          </button>
+          <button
+            onClick={() => setShowCreateProject(true)}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+          >
+            <FolderPlus size={16} />
+            Add Project
+          </button>
           <Link
             to="/settings"
             className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
@@ -196,6 +205,9 @@ export function Sidebar() {
 
       {showCreateProject && (
         <CreateProjectModal onClose={() => setShowCreateProject(false)} />
+      )}
+      {showCreateDivision && (
+        <CreateDivisionModal onClose={() => setShowCreateDivision(false)} />
       )}
     </>
   )
