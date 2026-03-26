@@ -12,12 +12,24 @@ export interface User {
   createdAt: string
 }
 
+export interface Division {
+  id: string
+  name: string
+  description?: string
+  color: string
+  createdAt: string
+  updatedAt: string
+  _count?: { projects: number }
+}
+
 export interface Project {
   id: string
   name: string
   description?: string
   color: string
   archived: boolean
+  divisionId?: string
+  division?: { id: string; name: string; color: string }
   members: ProjectMember[]
   _count?: { tasks: number }
   createdAt: string

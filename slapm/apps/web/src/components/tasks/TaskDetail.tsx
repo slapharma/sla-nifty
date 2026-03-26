@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Task, TaskPriority } from '../../types'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { X, CalendarDays, User, Plus, Check } from 'lucide-react'
-import { useUpdateTask, useCreateTask } from '../../hooks/useTasks'
+import { useUpdateTask, useCreateTask, useUpdateTaskStatus } from '../../hooks/useTasks'
 import { useProject } from '../../hooks/useProjects'
 
 const priorityConfig: Record<TaskPriority, { label: string; classes: string }> = {
@@ -20,6 +20,7 @@ interface Props {
 export function TaskDetail({ task, onClose }: Props) {
   const updateTask = useUpdateTask(task.projectId)
   const createTask = useCreateTask(task.projectId)
+  const updateStatus = useUpdateTaskStatus(task.projectId)
   const { data: project } = useProject(task.projectId)
 
   const [title, setTitle] = useState(task.title)
@@ -191,18 +192,37 @@ export function TaskDetail({ task, onClose }: Props) {
             </button>
           </div>
 
+          {task.subtasks && task.subtasks.length > 0 && (() => {
+            const done = task.subtasks.filter(s => s.status === 'DONE').length
+            return (
+              <div className="flex items-center gap-2 mb-2">
+                <div className="flex-1 bg-slate-100 rounded-full h-1.5">
+                  <div
+                    className="bg-green-500 h-1.5 rounded-full transition-all"
+                    style={{ width: `${Math.round((done / task.subtasks.length) * 100)}%` }}
+                  />
+                </div>
+                <span className="text-xs text-slate-500 shrink-0">{done}/{task.subtasks.length}</span>
+              </div>
+            )
+          })()}
           <div className="space-y-1">
             {(task.subtasks ?? []).map((sub) => (
-              <div key={sub.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-50 group">
-                <div className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center shrink-0 ${
-                  sub.status === 'DONE' ? 'bg-green-500 border-green-500' : 'border-gray-300'
+              <button
+                key={sub.id}
+                type="button"
+                onClick={() => updateStatus.mutate({ taskId: sub.id, status: sub.status === 'DONE' ? 'TODO' : 'DONE' })}
+                className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-50 w-full text-left group"
+              >
+                <div className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center shrink-0 transition-colors ${
+                  sub.status === 'DONE' ? 'bg-green-500 border-green-500' : 'border-gray-300 group-hover:border-blue-400'
                 }`}>
                   {sub.status === 'DONE' && <Check size={9} className="text-white" strokeWidth={3} />}
                 </div>
                 <span className={`text-sm flex-1 ${sub.status === 'DONE' ? 'line-through text-slate-400' : 'text-slate-700'}`}>
                   {sub.title}
                 </span>
-              </div>
+              </button>
             ))}
 
             {addingSubtask && (

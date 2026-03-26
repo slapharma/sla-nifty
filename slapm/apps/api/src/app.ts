@@ -11,6 +11,8 @@ import milestoneRoutes from './routes/milestones.routes';
 import commentRoutes from './routes/comments.routes';
 import driveRoutes from './routes/drive.routes';
 import exportRoutes from './routes/export.routes';
+import userRoutes from './routes/users.routes';
+import divisionRoutes from './routes/divisions.routes';
 
 export function createApp() {
   const app = express();
@@ -44,6 +46,12 @@ export function createApp() {
 
   // Export routes
   app.use('/api/export', exportRoutes);
+
+  // User management routes (admin only)
+  app.use('/api/users', userRoutes);
+
+  // Division routes
+  app.use('/api/divisions', divisionRoutes);
 
   // Health check
   app.get('/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCreateProject } from '../../hooks/useProjects'
+import { useDivisions } from '../../hooks/useDivisions'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { X } from 'lucide-react'
@@ -12,20 +13,23 @@ const COLORS = [
 
 interface Props {
   onClose: () => void
+  defaultDivisionId?: string
 }
 
-export function CreateProjectModal({ onClose }: Props) {
+export function CreateProjectModal({ onClose, defaultDivisionId }: Props) {
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [color, setColor] = useState(COLORS[0])
+  const [divisionId, setDivisionId] = useState(defaultDivisionId ?? '')
   const createProject = useCreateProject()
+  const { data: divisions = [] } = useDivisions()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!name.trim()) return
     createProject.mutate(
-      { name: name.trim(), description: description.trim() || undefined, color },
+      { name: name.trim(), description: description.trim() || undefined, color, divisionId: divisionId || undefined },
       {
         onSuccess: (project) => {
           onClose()
@@ -40,16 +44,26 @@ export function CreateProjectModal({ onClose }: Props) {
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-semibold text-slate-800 text-lg">New Project</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
-            <X size={18} />
-          </button>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X size={18} /></button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Project Name *
-            </label>
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Division</label>
+            <select
+              value={divisionId}
+              onChange={(e) => setDivisionId(e.target.value)}
+              className="mt-1 w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+            >
+              <option value="">— No division —</option>
+              {divisions.map((d) => (
+                <option key={d.id} value={d.id}>{d.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Project Name *</label>
             <Input
               autoFocus
               value={name}
@@ -60,21 +74,17 @@ export function CreateProjectModal({ onClose }: Props) {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Description
-            </label>
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Description</label>
             <Input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Optional project description"
+              placeholder="Optional"
               className="mt-1"
             />
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Color
-            </label>
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Color</label>
             <div className="flex gap-2 mt-2">
               {COLORS.map((c) => (
                 <button
@@ -92,9 +102,7 @@ export function CreateProjectModal({ onClose }: Props) {
             <Button type="submit" disabled={createProject.isPending || !name.trim()} className="flex-1">
               {createProject.isPending ? 'Creating…' : 'Create Project'}
             </Button>
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
+            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
           </div>
         </form>
       </div>

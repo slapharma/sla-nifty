@@ -21,7 +21,7 @@ export function useProject(projectId: string) {
 export function useCreateProject() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (data: { name: string; description?: string; color?: string }) =>
+    mutationFn: async (data: { name: string; description?: string; color?: string; divisionId?: string }) =>
       (await api.post<Project>('/projects', data)).data,
     onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
   })
