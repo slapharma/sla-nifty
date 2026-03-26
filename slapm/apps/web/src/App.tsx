@@ -8,6 +8,7 @@ import { LoginPage } from '@/pages/LoginPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { ProjectPage } from '@/pages/ProjectPage'
 import { SettingsPage } from '@/pages/SettingsPage'
+import { ArchivedTasksPage } from '@/pages/ArchivedTasksPage'
 
 export default function App() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
           >
             <Route index element={<DashboardPage />} />
             <Route path="projects/:projectId" element={<ProjectPage />} />
+            <Route path="archive" element={<ArchivedTasksPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
 

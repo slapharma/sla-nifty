@@ -8,40 +8,22 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
 import { CreateDivisionModal } from '@/components/divisions/CreateDivisionModal'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, ChevronRight, ChevronDown, Plus, Settings, LogOut, Loader2, Building2, Archive, FolderPlus } from 'lucide-react'
+import { LayoutDashboard, ChevronRight, ChevronDown, Settings, LogOut, Loader2, Building2, Archive, FolderPlus } from 'lucide-react'
 import type { Project } from '@/types'
 
 function ProjectLink({ project, active }: { project: Project; active: boolean }) {
-  const location = useLocation()
-  const isArchiveActive = active && location.search.includes('view=archive')
-  const isProjectActive = active && !isArchiveActive
-
   return (
-    <div>
-      <Link
-        to={`/projects/${project.id}`}
-        className={cn(
-          'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors group',
-          isProjectActive ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800'
-        )}
-      >
-        <span className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: project.color }} />
-        <span className="flex-1 truncate">{project.name}</span>
-        <ChevronRight size={11} className="opacity-0 group-hover:opacity-50" />
-      </Link>
-      {active && (
-        <Link
-          to={`/projects/${project.id}?view=archive`}
-          className={cn(
-            'flex items-center gap-1.5 pl-7 pr-3 py-1 rounded-lg text-xs transition-colors',
-            isArchiveActive ? 'text-slate-300' : 'text-slate-500 hover:text-slate-300'
-          )}
-        >
-          <Archive size={11} />
-          Archived Tasks
-        </Link>
+    <Link
+      to={`/projects/${project.id}`}
+      className={cn(
+        'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors group',
+        active ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800'
       )}
-    </div>
+    >
+      <span className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: project.color }} />
+      <span className="flex-1 truncate">{project.name}</span>
+      <ChevronRight size={11} className="opacity-0 group-hover:opacity-50" />
+    </Link>
   )
 }
 
@@ -170,6 +152,16 @@ export function Sidebar() {
 
         {/* Footer */}
         <div className="p-3 border-t border-slate-800 space-y-1">
+          <Link
+            to="/archive"
+            className={cn(
+              'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors',
+              location.pathname === '/archive' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            )}
+          >
+            <Archive size={16} />
+            Archived Tasks
+          </Link>
           <button
             onClick={() => setShowCreateDivision(true)}
             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
