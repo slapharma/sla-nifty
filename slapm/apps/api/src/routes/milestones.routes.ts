@@ -1,9 +1,9 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, RequestHandler } from 'express';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import * as milestoneService from '../services/milestone.service';
 
 const router = Router();
-router.use(requireAuth);
+router.use(requireAuth as RequestHandler);
 
 router.post('/', async (req: Request, res: Response) => {
   const milestone = await milestoneService.createMilestone(req.body);

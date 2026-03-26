@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, RequestHandler } from 'express';
 import multer from 'multer';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import * as driveService from '../services/drive.service';
@@ -7,7 +7,7 @@ import { prisma } from '../config/prisma';
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
-router.use(requireAuth);
+router.use(requireAuth as RequestHandler);
 
 router.post('/projects/:projectId/connect', async (req: Request, res: Response) => {
   const { accessToken } = req.body;

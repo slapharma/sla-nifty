@@ -1,9 +1,9 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, RequestHandler } from 'express';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { prisma } from '../config/prisma';
 
 const router = Router();
-router.use(requireAuth);
+router.use(requireAuth as RequestHandler);
 
 router.get('/', async (req: Request, res: Response) => {
   const { taskId } = req.query as { taskId: string };

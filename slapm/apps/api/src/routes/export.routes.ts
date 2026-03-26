@@ -1,10 +1,10 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, RequestHandler } from 'express';
 import { requireAuth } from '../middleware/auth';
 import { prisma } from '../config/prisma';
 import * as exportService from '../services/export.service';
 
 const router = Router();
-router.use(requireAuth);
+router.use(requireAuth as RequestHandler);
 
 router.get('/projects/:projectId/tasks.csv', async (req: Request, res: Response) => {
   const csv = await exportService.exportTasksCSV(req.params.projectId);
