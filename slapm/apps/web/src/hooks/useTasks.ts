@@ -42,7 +42,7 @@ export function useUpdateTaskPosition(projectId: string) {
 export function useCreateTask(projectId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (data: Partial<Task> & { title: string }) =>
+    mutationFn: async (data: Partial<Task> & { title: string; assigneeId?: string; dueDate?: string; parentId?: string }) =>
       (await api.post<Task>('/tasks', { ...data, projectId })).data,
     onSuccess: () => qc.invalidateQueries({ queryKey: ['tasks', projectId] }),
   })
