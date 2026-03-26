@@ -27,6 +27,15 @@ export function useCreateProject() {
   })
 }
 
+export function useArchiveProject() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (projectId: string) =>
+      api.delete(`/projects/${projectId}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
+  })
+}
+
 export function useUpdateProject() {
   const qc = useQueryClient()
   return useMutation({

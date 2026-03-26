@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { KanbanBoard } from '../components/kanban/KanbanBoard'
 import { TaskList } from '../components/tasks/TaskList'
 import { TaskDetail } from '../components/tasks/TaskDetail'
@@ -7,10 +7,10 @@ import { TaskForm } from '../components/tasks/TaskForm'
 import { GanttChart } from '../components/gantt/GanttChart'
 import { MilestoneList } from '../components/milestones/MilestoneList'
 import { useTasks, useTask } from '../hooks/useTasks'
-import { useProject, useUpdateProject } from '../hooks/useProjects'
+import { useProject, useUpdateProject, useArchiveProject } from '../hooks/useProjects'
 import { useDivisions } from '../hooks/useDivisions'
 import { TaskStatus } from '../types'
-import { LayoutGrid, List, GanttChart as GanttIcon, Flag, Plus, Pencil, Check, X, Building2, ChevronDown } from 'lucide-react'
+import { LayoutGrid, List, GanttChart as GanttIcon, Flag, Plus, Pencil, Check, X, Building2, ChevronDown, Trash2 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 
 type ViewMode = 'kanban' | 'list' | 'gantt' | 'milestones'
@@ -24,6 +24,7 @@ const views: { id: ViewMode; label: string; icon: React.ReactNode }[] = [
 
 export function ProjectPage() {
   const { projectId } = useParams<{ projectId: string }>()
+  const navigate = useNavigate()
   const [viewMode, setViewMode] = useState<ViewMode>('kanban')
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
   const [addTaskStatus, setAddTaskStatus] = useState<TaskStatus | null>(null)
@@ -38,6 +39,7 @@ export function ProjectPage() {
   const selectedTask = tasks.find(t => t.id === selectedTaskId) ?? fetchedTask ?? null
   const { data: project } = useProject(projectId ?? '')
   const updateProject = useUpdateProject()
+  const archiveProject = useArchiveProject()
   const { data: divisions = [] } = useDivisions()
 
   useEffect(() => {
@@ -161,6 +163,18 @@ export function ProjectPage() {
               </div>
             )}
           </div>
+
+          <button
+            onClick={() => {
+              if (projectId && window.confirm(`Delete "${project?.name}"? This will archive the project and all its tasks.`)) {
+                archiveProject.mutate(projectId, { onSuccess: () => navigate('/') })
+              }
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm border border-red-200 text-red-500 hover:bg-red-50 transition-colors"
+            title="Delete project"
+          >
+            <Trash2 size={14} />
+          </button>
 
           {(viewMode === 'kanban' || viewMode === 'list') && (
             <Button size="sm" onClick={() => setAddTaskStatus('TODO')}>
