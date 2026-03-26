@@ -43,6 +43,8 @@ export function Sidebar() {
   const toggle = (id: string) => setCollapsed((p) => ({ ...p, [id]: !p[id] }))
 
   // divisions always has data (API or builtin fallback); group projects by ID
+  const unassigned = projects.filter((p) => !p.divisionId && !p.division)
+
   const byDivision = divisions.map((div) => ({
     division: div,
     projects: projects.filter((p) => (p.divisionId ?? p.division?.id) === div.id),
@@ -116,6 +118,25 @@ export function Sidebar() {
                     )}
                   </div>
                 ))}
+
+                {unassigned.length > 0 && (
+                  <div className="mt-1">
+                    <button
+                      onClick={() => toggle('__unassigned__')}
+                      className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-white hover:bg-slate-800 transition-colors"
+                    >
+                      <span className="flex-1 text-left">Unassigned</span>
+                      {collapsed['__unassigned__'] ? <ChevronRight size={11} /> : <ChevronDown size={11} />}
+                    </button>
+                    {!collapsed['__unassigned__'] && (
+                      <div className="ml-3 mt-0.5 space-y-0.5 border-l border-slate-800 pl-2">
+                        {unassigned.map((p) => (
+                          <ProjectLink key={p.id} project={p} active={projectId === p.id} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
 
               </>
             )}
